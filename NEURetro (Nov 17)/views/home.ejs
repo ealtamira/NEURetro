@@ -5,14 +5,7 @@
         <link rel="stylesheet" href="./css/site.css"/>
     </head>
     <body>
-        <header>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/login">Login</a>
-                <a href="/register">Register</a>
-                <a href="/leaderboard">Leaderboard</a>
-            </nav>
-        </header>
+        <%- include(header, {userID: userID}) %>
         <h1>Home</h1>
         <p>
             Discover the world of {placeholder}. Here is this game, traviers through the various cources in {placeholder}.<br> Collect item

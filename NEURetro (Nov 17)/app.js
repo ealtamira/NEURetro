@@ -41,12 +41,16 @@ app.get('/', errorWrap((req, res) => {
 app.get('/login', (req, res) => {
     console.log("LOGIN REQUEST",  req.session.username);
     
-    let model = {
-        username: '',
-        password: '',
-    }
+    if (req.session.username != undefined) {
+        res.redirect('/');
+    } else {
+        let model = {
+            username: '',
+            password: '',
+        }
 
-    res.render('login', model);
+        res.render('login', model);
+    }
 });
 
 app.post('/login', async (req, res) => {
@@ -89,7 +93,12 @@ app.post('/login', async (req, res) => {
             }
         })
     } else {
-        res.render('login')
+        let model = {
+            username: '',
+            password: ''
+        }
+
+        res.render('login', model)
     }
 
     // try {
@@ -115,6 +124,10 @@ app.post('/login', async (req, res) => {
 app.get('/register', (req, res) => {
     console.log("REGISTER REQUEST", req.session.username);
     
+    if (req.session.username != undefined) {
+        res.redirect('/');
+    } else {
+
     let model = {
         username: '',
         password: '',
@@ -123,88 +136,155 @@ app.get('/register', (req, res) => {
     }
 
     res.render('register', model);
+    }
 });
 
 app.post('/register', async (req, res) => {
     let model = req.body;
 
-    let pwd = model.password
-
     if (model.username != '' && model.password != '') {
 
-    bcrypt.hash(pwd, saltRounds, function(err, password) {
-        console.log(password);
-        req.body.password = password;
-    })
+        data = await DAL.getUserByUsername(model.username);
+        
+        if (data != null || data != undefined) {
+            console.log("USER ALREADY EXISTS");
+            res.render('register', model)
+        } else {
+            password = await bcrypt.hash(model.password, saltRounds);
+        
+            model.password = password;
 
-    DAL.createUser(model);
+            DAL.createUser(model);
 
-    console.log("REGISTER POSTED", model, req.session.username);
+            console.log("REGISTER POSTED", model, req.session.username);
 
-    res.redirect('/login')
+            res.redirect('/login')
+        }
+
     } else {
         console.log("COULDN'T REGISTER USER");
         res.render('register', model)
     }
-
-    // try {
-    //     if (!model.username || !model.password) {
-    //         throw new Error('Username and password are required.');
-    //     }
-    //     await DAL.createUser(body);
-    //     console.log("User registered successfully:", model.username);
-    //     res.redirect('/login');
-    // } catch (error) {
-    //     console.error('Error registering user:', error);
-    //     res.render('register');
-    // }
 });
 
-app.get('/profile', async (req, res) => {
-    console.log("PROFILE REQUEST", req.session.username);
+app.get('/resetpassword', async (req, res) => {
+    console.log("RESET PASSWORD REQUEST", req.session.username);
 
-    try {
-        const userProfile = await DAL.getUserProfile(req.session.username);
+    let model = {
+        username: ''
+    }
 
-        if (!userProfile) {
-            return res.status(404).send('User not found');
+    res.render('resetpassword', model)
+});
+
+app.post('/resetpassword', async (req, res) => {
+    let username = req.body.username;
+    let pwd = req.body.password;
+
+    let data = await DAL.getUserByUsername(username);
+
+    if (data != null | data != undefined) {
+        if (req.body.question1 == data.question1 && req.body.question2 == data.question2 && req.body.question3 == data.question3) {
+            console.log("Correct Information, resetting password..")
+
+            password = await bcrypt.hash(pwd, saltRounds);
+            
+            await DAL.resetUserPassword(username, password);
+
+            res.redirect('/login')
+        } else {
+            console.log("INCORRECT SECURITY QUESTIONS.")
+
+            let model = {
+                username: username
+            }
+
+            res.render('resetpassword', model)
+        }
+    } else {
+        console.log("NO USER EXISTS.")
+
+        let model = {
+            username: ''
         }
 
-        res.render('profile', userProfile);
-    } catch (error) {
-        console.error('Error retrieving user information:', error);
-        res.status(500).send('Internal Server Error');
+        res.render('resetpassword')
     }
 });
 
-app.get('/profile/:username', async (req, res) => {
-    console.log("PROFILE REQUEST", req.params.username);
-    const username = req.params.username;
-    try {
-        const users = await DAL.getUsers();
-        const user = users.find(user => user.username === username);
+app.get('/profile/:userName', errorWrap(async (req, res) => {
+    let searchRes = req.query.search;
+    console.log("Search Box:", searchRes);
 
-        if (!user) {
-            return res.status(404).send('User not found');
+    var params;
+ 
+    if (searchRes == "") {
+        params = req.session.username;
+        console.log("Set to  " + params)
+    } else if ( !searchRes || searchRes == "{}") {
+        params = req.params["userName"];
+    } else {
+        let info = await DAL.getUserByUsername(searchRes);
+        if (!info)  {
+            console.log("Invalid");
+            res.redirect('/');
+            return;
+        } else {
+        params = info._id;
+        res.redirect(`/profile/${params}`);
+        return;
         }
-
-        res.render('profile', { user: user });
-    } catch (error) {
-        console.error('Error retrieving user information:', error);
-        res.status(500).send('Internal Server Error');
     }
-});
 
-app.post('/profile', (req, res) => {
     let username = req.session.username;
-    const newUsername = req.body.username;
-    const newEmail = req.body.email;
-    const newAge = req.body.age;
 
-    DAL.UpdateUser(username, newUsername, newEmail, newAge)
+    var data = {}
 
-    res.redirect('/profile');
-});
+    if (params.length > 0) {
+        data = await DAL.getUserByUsername(params);
+    } else {
+        data = {
+            username: "",
+            _id: ""
+        }
+    }
+
+    //console.log(data);
+
+    let UName = data.username;
+    let UID = data._id;
+    let age = data.age;
+    
+    let model = {
+        username: UName,
+        userID: UID,
+        sUName: username,
+        age: age,
+        header: './partials/header.ejs'
+    }
+    
+    res.render(`profile`, model);
+}));
+
+app.post('/profile', errorWrap(async (req, res) => {
+    let username = req.session.username;
+    let newUsername = req.body.username;
+    let newAge = req.body.age;
+
+    data = await DAL.setProfileStats(username, newUsername, newAge);
+
+    req.session.username = newUsername;
+
+    let model = {
+        username: data.username,
+        userID: data._id,
+        sUName: req.session.username,
+        age: data.age,
+        header: './partials/header.ejs'
+    }
+
+    res.render(`profile`, model);
+}));
 
 app.get('/logout', (req, res) => {
     console.log("LOGOUT REQUEST", req.session.username);
