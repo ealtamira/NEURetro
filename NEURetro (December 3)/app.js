@@ -6,6 +6,7 @@ const { DAL } = require('./mongo-dal')
 const bcrypt = require('bcrypt');
 const path = require('path');
 const { MongoClient } = require('mongodb');
+const { register } = require('module');
 const saltRounds = 10;
 
 const app = express();
@@ -39,6 +40,9 @@ app.get('/', errorWrap((req, res) => {
 }))
 
 app.get('/login', (req, res) => {
+    let username = req.session.username;
+    let userID = req.session.userID;
+
     console.log("LOGIN REQUEST",  req.session.username);
     
     if (req.session.username != undefined) {
@@ -47,6 +51,9 @@ app.get('/login', (req, res) => {
         let model = {
             username: '',
             password: '',
+            username: username,
+            userID: userID,
+            header: './partials/header.ejs'
         }
 
         res.render('login', model);
@@ -132,7 +139,10 @@ app.get('/register', (req, res) => {
         username: '',
         password: '',
         email: '',
-        age: ''
+        age: '',
+        errorText: '',
+        userID: req.session.userID,
+        header: './partials/header.ejs'
     }
 
     res.render('register', model);
@@ -140,7 +150,32 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    let model = req.body;
+    let model = {
+        username: req.body.username,
+        password: req.body.password,
+        email: req.body.email,
+        age: req.body.age,
+        userID: req.session.userID,
+        question1: req.body.question1,
+        question2: req.body.question2,
+        question3: req.body.question3,
+        errorText: '',
+        header: './partials/header.ejs'
+    };
+
+
+    let userData = {
+        username: req.body.username,
+        password: req.body.password,
+        email: req.body.email,
+        age: req.body.age,
+        userID: req.session.userID,
+        question1: req.body.question1,
+        question2: req.body.question2,
+        question3: req.body.question3,
+        highScore: 0
+    }
+    
 
     if (model.username != '' && model.password != '') {
 
@@ -149,12 +184,16 @@ app.post('/register', async (req, res) => {
         if (data != null || data != undefined) {
             console.log("USER ALREADY EXISTS");
             res.render('register', model)
+
+            model.errorText = "User Already Exists."
+
         } else {
             password = await bcrypt.hash(model.password, saltRounds);
         
             model.password = password;
+            userData.password = password;
 
-            DAL.createUser(model);
+            DAL.createUser(userData);
 
             console.log("REGISTER POSTED", model, req.session.username);
 
@@ -162,6 +201,8 @@ app.post('/register', async (req, res) => {
         }
 
     } else {
+        model.errorText = "Couldn't Register User."
+
         console.log("COULDN'T REGISTER USER");
         res.render('register', model)
     }
@@ -171,7 +212,9 @@ app.get('/resetpassword', async (req, res) => {
     console.log("RESET PASSWORD REQUEST", req.session.username);
 
     let model = {
-        username: ''
+        username: '',
+        userID: req.session.userID,
+        header: './partials/header.ejs'
     }
 
     res.render('resetpassword', model)
@@ -297,8 +340,38 @@ app.get('/logout', (req, res) => {
 app.get('/leaderboard', async (req, res) => {
     console.log("LEADERBOARD REQUEST", req.session.username);
 
-    res.render('leaderboard')
+    let data = await DAL.getScores();
+
+    for (var i = 0; i < data.length; i++) {
+        console.log(data[i].username)
+        console.log(data[i].highScore)
+    }
+
+    let model = {
+        username: req.session.username,
+        userID: req.session.userID,
+        header: "./partials/header.ejs",
+        data: data
+    }
+
+    res.render('leaderboard', model)
 });
+
+app.get('/game', async (req, res) => {
+    let model = {
+        username: req.session.username,
+        userID: req.session.userID,
+        header: './partials/header.ejs'
+    }
+
+    if (1 != 1) {
+        console.log('get out you\'re not logged in')
+        res.redirect('/')
+    } else {
+        console.log('ok u cool u stay')
+        res.render('game', model)
+    }
+})
 
 app.listen(PORT, (req, res) => {
     console.log(`Express is now listening on http://localhost:${PORT}`);

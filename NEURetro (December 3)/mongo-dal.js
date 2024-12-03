@@ -112,5 +112,17 @@ exports.DAL = {
         await client.close();
 
         return returnData;
+    },
+    getScores: async function() {
+        await client.connect();
+
+        const database = client.db("NEURetroDB");
+        const collection = database.collection("UsersCollection");
+
+        let data = await collection.find({ }).sort({ highScore : -1, username: 1 }).toArray();
+
+        await client.close();
+
+        return data;
     }
 }

@@ -5,16 +5,15 @@
         <link rel="stylesheet" href="./css/site.css"/>
     </head>
     <body>
-        <header>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/login">Login</a>
-                <a href="/register">Register</a>
-            </nav>
-        </header>
+        <%- include(header, {userID: userID}) %>
         <h1>Leaderboard</h1>
         <div>
-
+        <ol>
+            <% for (var i = 0; i < data.length; i++) { %>
+            <h1>#<%= i + 1 %>: <%= data[i].username %> </h1>
+            <h2>High Score: <%= data[i].highScore %> </h2>
+            <% } %>
+        </ol>
         </div>
         <footer>
             Copyright © 2024 OASIS

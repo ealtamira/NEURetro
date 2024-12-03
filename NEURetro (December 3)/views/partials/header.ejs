@@ -1,4 +1,4 @@
-<header>
+<header class="jersey-25-regular">
     <nav>
         <a href="/">Home</a>
         <% if(!username){ %>
@@ -6,6 +6,7 @@
             <a href="/login">Login</a>
         <% } else { %>
             <a href="/profile/<%= username %>">Profile</a>
+            <a href="/game">Game</a>
             <a href="/logout">Logout</a>
         <% } %>
         <a href="/leaderboard">Leaderboard</a>

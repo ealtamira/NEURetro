@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>NEURetro</title>
+        <link rel="stylesheet" href="./css/site.css"/>
+        <script src="./js/site.js" defer></script>
+    </head>
+    <body>
+        <%- include(header, {userID: userID}) %>
+        <h1>Game</h1>
+        <iframe id="game" src="http://localhost:3000/" style="width: 1280px; height: 720px;">
+        </iframe>
+        <footer>
+            Copyright © 2024 OASIS
+        </footer>
+    </body>
+</html>

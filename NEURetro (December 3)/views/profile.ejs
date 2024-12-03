@@ -5,16 +5,14 @@
         <link rel="stylesheet" href="/css/site.css"/>
     </head>
     <body>
-        <header>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/logout">Logout</a>
-                <a href="/leaderboard">Leaderboard</a>
-            </nav>
-        </header>
+        <%- include(header, {userID: userID}) %>
         <h1><%= username %></h1>
         <div class="profile-info">
+            <% if (sUName == username) { %>
             <h2>Your Information</h2>
+            <% } else { %>
+            <h2><%= username %>'s Information</h2>
+            <% } %>
             <p><strong>Username:</strong> <%= username %></p>
             <p><strong>Age:</strong> <%= age %></p>
         </div>

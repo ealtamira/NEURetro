@@ -5,47 +5,36 @@
         <link rel="stylesheet" href="/css/site.css">
     </head>
     <body>
-        <header>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/login">Login</a>
-            </nav>
-        </header>
+        <%- include(header, {userID: userID}) %>
         <h1>Register</h1>
+        <p id="errorText"><%= errorText %></p>
         <form action="/register" method="post">
-            <label for="username">Username:</label>
             <input type="text" name="username" placeholder="Username" value="<%= username %>" required/>
             <br>
-            <label for="password">Password:</label>
             <input type="password" name="password" placeholder="Password" value="<%= password %>" required/>
             <br>
-            <label for="email">Email:</label>
             <input type="email" name="email" placeholder="Email" value="<%= email %>" required/>
             <br>
-            <label for="age">Age:</label>
             <input type="number" name="age" placeholder="Age" value="<%= age %>" required/>
             <br>
-            <label for="question1">What is your favorite color?</label>
             <select id="question1" name="question1" required>
-                <option value="">Select a color</option>
+                <option value="">Select your favorite color</option>
                 <option value="Red">Red</option>
                 <option value="Blue">Blue</option>
                 <option value="Green">Green</option>
                 <option value="Other">Other</option>
             </select>
             <br>
-            <label for="question2">What is your favorite animal?</label>
             <select id="question2" name="question2" required>
-                <option value="">Select an animal</option>
+                <option value="">Select your favorite animal</option>
                 <option value="Dog">Dog</option>
                 <option value="Cat">Cat</option>
                 <option value="Bird">Bird</option>
                 <option value="Other">Other</option>
             </select>
             <br>
-            <label for="question3">What region are you from?</label>
             <select id="question3" name="question3" required>
-                <option value="">Select a region</option>
+                <option value="">Select your region</option>
                 <option value="North America">North America</option>
                 <option value="Europe">Europe</option>
                 <option value="Asia">Asia</option>
