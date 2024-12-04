@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Register</title>
+        <link rel="stylesheet" href="/css/site.css"/>
+    </head>
+    <body>
+        <%- include(header, {userID: userID}) %>
+        <h1><%= pUsername %></h1>
+        <div class="profile-info">
+            <% if (username == pUsername) { %>
+            <h2>Your Information</h2>
+            <% } else { %>
+            <h2><%= pUsername %>'s Information</h2>
+            <% } %>
+            <p><strong>Username:</strong> <%= pUsername %></p>
+            <p><strong>Age:</strong> <%= age %></p>
+        </div>
+        <% if (username == pUsername) { %>
+        <div class="edit-profile">
+            <h2>Edit Your Information</h2>
+            <p id="errorText"> <%= errorText %> </p>
+            <form action="/profile" method="POST">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="<%= username %>" required>
+                <br>
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" value="<%= age %>" required>
+                <br>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+        <% } %>
+<!-- 
+        <form action="/submitscore/69420" method="POST">
+            <button type="submit">debug</button>
+        </form> -->
+        <footer>
+            Copyright © 2024 OASIS
+        </footer>
+    </body>
+</html>

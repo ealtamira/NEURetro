@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>NEURetro</title>
+        <link rel="stylesheet" href="./css/site.css"/>
+        <script src="./js/site.js" defer></script>
+    </head>
+    <body>
+        <%- include(header, {userID: userID}) %>
+        <h1>Game</h1>
+        <iframe id="game" src="http://localhost:3000/" style="width: 1280px; height: 720px;"></iframe>
+
+        <!-- GPT was used for help and assisted with this bit -->
+        <script>
+            window.addEventListener('message', (event) => {
+                if (event.origin !== 'https://localhost:3000') {
+                    return;
+                }
+
+                const data = event.data;
+
+                if (data.type == 'renderWin' && data.score) {
+                    var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open("POST", "http://localhost:7777/submitscore/" + data.score);
+                    xmlHttp.setRequestHeader("Content-Type", "application/json");
+                    xmlHttp.send();
+                    xmlHttp.onreadystatechange = function () {
+                        if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                            console.log("I'm finally done...")
+                        }
+                    }
+                }
+            })
+            </script>
+        <footer>
+            Copyright © 2024 OASIS
+        </footer>
+    </body>
+</html>

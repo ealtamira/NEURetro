@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/site.css">
+  <script src="../js/game.js" defer></script>
+  <title>Platformer Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden; /* Prevent scrolling */
+    }
+    
+    #gameCanvas {
+      display: block;
+      width: 100%;       /* Full-width */
+      height: 97%;      /* Full-height */
+      background-color: #87ceeb; /* Light sky blue */
+    }
+  </style>
+</head>
+<body>
+    <%- include(header, {userID: userID}) %>
+    <canvas id="gameCanvas"></canvas>
+</body>
+</html>
