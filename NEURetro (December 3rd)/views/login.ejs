@@ -7,6 +7,7 @@
     <body>
         <%- include(header, {userID: userID}) %>
         <h1>Login</h1>
+        <p id="errorText"> <%= errorText %> </p>
         <form action="/login" method="post">
             <input type="text" name="username" placeholder="Username" value="<%= username %>" required>
             <br>

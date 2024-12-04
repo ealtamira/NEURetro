@@ -50,6 +50,10 @@ input {
     border: 1px solid #ffffff;
 }
 
+ol {
+    margin-right: 2.5%;
+}
+
 button {
     padding: 16px;
     border-radius: 3px;

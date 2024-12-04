@@ -24,6 +24,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded());
 
+app.post('/submitscore/:score', (req, res) => {
+    let username = req.session.username;
+
+    let score = Number(req.params.score);
+
+    console.log("Test Score", score)
+
+    if (username != undefined || username != null) {
+        DAL.submitScore(username, score);
+    } else {
+        console.log("unable to submit, user is a guest")
+    }
+});
+
 app.get('/', errorWrap((req, res) => {
     let username = req.session.username;
     let userID = req.session.userID;
@@ -53,7 +67,8 @@ app.get('/login', (req, res) => {
             password: '',
             username: username,
             userID: userID,
-            header: './partials/header.ejs'
+            header: './partials/header.ejs',
+            errorText: ''
         }
 
         res.render('login', model);
@@ -93,16 +108,23 @@ app.post('/login', async (req, res) => {
 
                 let model = {
                     username: username,
-                    password: ''
+                    userID: req.session.userID,
+                    password: '',
+                    header: './partials/header.ejs',
+                    errorText: 'Incorrect username or password.'
                 }
 
                 res.render('login', model)
             }
         })
     } else {
+
         let model = {
             username: '',
-            password: ''
+            userID: req.session.userID,
+            password: '',
+            header: './partials/header.ejs',
+            errorText: 'Incorrect username or password.'
         }
 
         res.render('login', model)
@@ -156,9 +178,6 @@ app.post('/register', async (req, res) => {
         email: req.body.email,
         age: req.body.age,
         userID: req.session.userID,
-        question1: req.body.question1,
-        question2: req.body.question2,
-        question3: req.body.question3,
         errorText: '',
         header: './partials/header.ejs'
     };
@@ -183,9 +202,10 @@ app.post('/register', async (req, res) => {
         
         if (data != null || data != undefined) {
             console.log("USER ALREADY EXISTS");
-            res.render('register', model)
 
-            model.errorText = "User Already Exists."
+            model.errorText = "User Already Exists.";
+
+            res.render('register', model);
 
         } else {
             password = await bcrypt.hash(model.password, saltRounds);
@@ -214,7 +234,8 @@ app.get('/resetpassword', async (req, res) => {
     let model = {
         username: '',
         userID: req.session.userID,
-        header: './partials/header.ejs'
+        header: './partials/header.ejs',
+        errorText: ''
     }
 
     res.render('resetpassword', model)
@@ -239,7 +260,10 @@ app.post('/resetpassword', async (req, res) => {
             console.log("INCORRECT SECURITY QUESTIONS.")
 
             let model = {
-                username: username
+                username: username,
+                errorText: 'Incorrect Security Questions.',
+                userID: req.session.userID,
+                header: './partials/header.ejs'
             }
 
             res.render('resetpassword', model)
@@ -248,10 +272,13 @@ app.post('/resetpassword', async (req, res) => {
         console.log("NO USER EXISTS.")
 
         let model = {
-            username: ''
+            username: username,
+            errorText: 'Incorrect Security Questions.',
+            userID: req.session.userID,
+            header: './partials/header.ejs'
         }
 
-        res.render('resetpassword')
+        res.render('resetpassword', model)
     }
 });
 
@@ -364,13 +391,7 @@ app.get('/game', async (req, res) => {
         header: './partials/header.ejs'
     }
 
-    if (1 != 1) {
-        console.log('get out you\'re not logged in')
-        res.redirect('/')
-    } else {
-        console.log('ok u cool u stay')
-        res.render('game', model)
-    }
+    res.render('game', model)
 })
 
 app.listen(PORT, (req, res) => {

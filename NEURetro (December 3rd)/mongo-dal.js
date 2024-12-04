@@ -124,5 +124,30 @@ exports.DAL = {
         await client.close();
 
         return data;
+    },
+    submitScore: async function(username, newScore) {
+        await client.connect();
+
+        const database = client.db("NEURetroDB");
+        const collection = database.collection("UsersCollection");
+
+        let data = await collection.findOne({username: username});
+
+        console.log("Data Score", data.highScore)
+
+        if (newScore > data.highScore) {
+           
+            const result = await collection.updateOne({username: username},
+                {
+                    $set: {
+                        highScore: newScore
+                    }
+                });
+
+        } else {
+            console.log("Not a high score")
+        }
+
+        await client.close();
     }
 }
